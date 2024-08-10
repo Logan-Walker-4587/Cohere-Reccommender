@@ -1,18 +1,26 @@
 import streamlit as st
 from flask import Flask, request, jsonify
 from threading import Thread
+import cohere
 import requests
 from werkzeug.serving import run_simple
 
 # Initialize Flask app
 app = Flask(__name__)
 
+# Initialize Cohere API
+cohere_client = cohere.Client('nTf1sAvJZ7u6fUgFpbpdpOcN8VnvIzOhiXksBpBj')  # Replace with your actual API key
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     question = request.form.get('question')
-    # Process the question with your model
-    response = {"answer": f"Processed: {question}"}
-    return jsonify(response)
+    # Use your Cohere model to process the question
+    response = cohere_client.generate(
+        model='large',
+        prompt=question,
+        max_tokens=50,
+    )
+    return jsonify({"answer": response.generations[0].text.strip()})
 
 # Function to run Flask in a thread
 def run_flask():
